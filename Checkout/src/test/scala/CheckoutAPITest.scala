@@ -9,6 +9,10 @@ class CheckoutAPITest extends AnyFeatureSpec with GivenWhenThen {
   val invalidInputFruitList = List("fruit1", "yyy", "zzz")
   val emptyFruitList = List.empty
 
+  val specialOfferList = List(Apple, Orange)
+  val emptySpecialOfferList = List.empty
+
+
   Feature("Feature 1.0: The user provides a list at checkout ") {
     Scenario("Checkout on a list of valid items") {
 
@@ -85,6 +89,39 @@ class CheckoutAPITest extends AnyFeatureSpec with GivenWhenThen {
       Then("a list of errors is generated")
       assert(res.nonEmpty)
 
+
+    }
+  }
+
+  Feature("Feature 2.0: The user provides a list at checkout with special offers available"){
+    Scenario("Checkout on a list of valid items") {
+
+      Given("A list of items")
+      assert(validInputFruitList.nonEmpty)
+
+      When("checkout is processed")
+      val res = Checkout.processCheckout(validInputFruitList2, specialOfferList)
+      assert(res.nonEmpty)
+
+      Then("the total cost of items should be returned")
+      res.map(result => assert(result.equals("£1.85")))
+
+    }
+  }
+
+  Feature("Feature 2.1: The user provides a list at checkout with no special offers available"){
+    Scenario("Checkout on a list of valid items") {
+
+      Given("A list of items")
+      assert(validInputFruitList.nonEmpty)
+
+      When("checkout is processed")
+      val res = Checkout.processCheckout(validInputFruitList2)
+      assert(res.nonEmpty)
+
+      Then("the total cost of items should be returned")
+      println(res)
+      res.map(result => assert(result.equals("£2.95")))
 
     }
   }

@@ -2,11 +2,13 @@ object Checkout extends App{
 
   val listOfFruits = List("Apple", "Apple", "Orange", "Orange", "Orange", "Orange", "Orange", "Orange", "Orange")
 
+  displayResult()
+
   def displayResult(): Unit = {
     processCheckout(listOfFruits).foreach(result => println(result))
   }
 
-  def processCheckout(ls: List[String]): List[String] = {
+  def processCheckout(ls: List[String], specialOffers: List[Offer[_ >: Apple with Orange <: Fruit]] = List()): List[String] = {
 
     val fruitContainer = FruitFactory.generateFruit(ls)
     val fruitListErrorContainer = if (fruitContainer.isEmpty) List(Left(EmptyFruitList)) else fruitContainer.filter(_.isLeft)
@@ -20,7 +22,7 @@ object Checkout extends App{
 
     }.toList else {
       val ls = fruitContainer.flatMap(_.toOption)
-      val res = calculatePrice(ls.toList)
+      val res = calculatePrice(ls.toList, specialOffers)
       val finalPriceString = f"£$res%1.2f"
       List(finalPriceString)
 
@@ -28,8 +30,12 @@ object Checkout extends App{
 
   }
 
-  private def calculatePrice(fruitContainer: List[Fruit]): Float = {
-    val totalPrice = fruitContainer.foldLeft(0) {
+  private def calculatePrice(fruitContainer: List[Fruit], specialOffers: List[Offer[_ >: Apple with Orange <: Fruit]] = List()): Float = {
+    val updatedFruitListAfterOffer = if (specialOffers.nonEmpty)
+      specialOffers.distinct.flatMap(offer => offer.applyOffer(fruitContainer))
+    else fruitContainer
+
+    val totalPrice = updatedFruitListAfterOffer.foldLeft(0) {
       (total, next) => {
         next match {
           case Apple(price) => total + price

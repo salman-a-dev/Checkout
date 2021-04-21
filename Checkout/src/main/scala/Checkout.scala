@@ -1,11 +1,13 @@
 object Checkout extends App{
-
+  val specialOffers = List(Apple, Orange)
   val listOfFruits = List("Apple", "Apple", "Orange", "Orange", "Orange", "Orange", "Orange", "Orange", "Orange")
 
   displayResult()
 
   def displayResult(): Unit = {
     processCheckout(listOfFruits).foreach(result => println(result))
+
+    processCheckout(listOfFruits, specialOffers).foreach(result => println(result))
   }
 
   def processCheckout(ls: List[String], specialOffers: List[Offer[_ >: Apple with Orange <: Fruit]] = List()): List[String] = {

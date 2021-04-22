@@ -10,6 +10,7 @@ class CheckoutAPITest extends AnyFeatureSpec with GivenWhenThen {
   val emptyFruitList = List.empty
 
   val specialOfferList = List(Apple, Orange)
+  val specialOfferListWithOneOffer = List(Orange)
   val emptySpecialOfferList = List.empty
 
 
@@ -42,7 +43,7 @@ class CheckoutAPITest extends AnyFeatureSpec with GivenWhenThen {
       res.map(result => assert(result.equals(errString)))
 
     }
-    Scenario("The user provides a list of items that dont exist ") {
+    Scenario("The user provides a list of items that don't exist ") {
       Given("An incorrect list")
       assert(invalidInputFruitList.nonEmpty)
 
@@ -94,10 +95,10 @@ class CheckoutAPITest extends AnyFeatureSpec with GivenWhenThen {
   }
 
   Feature("Feature 2.0: The user provides a list at checkout with special offers available"){
-    Scenario("Checkout on a list of valid items") {
+    Scenario("Checkout on a list of valid items with multiple offers") {
 
-      Given("A list of items")
-      assert(validInputFruitList.nonEmpty)
+      Given("A list of items and multiple special offers")
+      assert(validInputFruitList2.nonEmpty)
 
       When("checkout is processed")
       val res = Checkout.processCheckout(validInputFruitList2, specialOfferList)
@@ -107,20 +108,31 @@ class CheckoutAPITest extends AnyFeatureSpec with GivenWhenThen {
       res.map(result => assert(result.equals("£1.85")))
 
     }
+    Scenario("Checkout on a list of valid items with one offer"){
+      Given("A list of items and one special offer")
+      assert(validInputFruitList2.nonEmpty)
+
+      When("checkout is processed")
+      val res = Checkout.processCheckout(validInputFruitList2, specialOfferListWithOneOffer)
+      assert(res.nonEmpty)
+
+      Then("the total cost of items should be returned")
+      res.map(result => assert(result.equals("£2.45")))
+    }
+
   }
 
   Feature("Feature 2.1: The user provides a list at checkout with no special offers available"){
     Scenario("Checkout on a list of valid items") {
 
       Given("A list of items")
-      assert(validInputFruitList.nonEmpty)
+      assert(validInputFruitList2.nonEmpty)
 
       When("checkout is processed")
       val res = Checkout.processCheckout(validInputFruitList2)
       assert(res.nonEmpty)
 
       Then("the total cost of items should be returned")
-      println(res)
       res.map(result => assert(result.equals("£2.95")))
 
     }

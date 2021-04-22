@@ -1,32 +1,45 @@
-sealed trait Fruit
+sealed abstract class Fruit(val price:Int)
 
-final case class Apple(price: Int = 60) extends Fruit
 
-final case class Orange(price: Int = 25) extends Fruit
+final case class Apple(override val price: Int = 60) extends Fruit(price)
 
-object Apple extends Offer[Apple] {
-  override def applyOffer(fruitList: List[Fruit]): List[Apple] = {
-    val apples = fruitList.flatMap {
-      case apple: Apple => Some(apple)
-      case _ => None
-    }
-    val numberOfApplesAfterOffer = (apples.length / 2) + (apples.length % 2)
-    apples.slice(0, numberOfApplesAfterOffer)
+final case class Orange(override val price: Int = 25) extends Fruit(price)
+
+object Apple extends Offer {
+  override  def specialOffer(fruitList: List[Fruit]) : Double = {
+
+
+    val priceOff = (numberOfApples:Int, price:Int)=>{
+      ((numberOfApples / 2) * {
+      if (numberOfApples == 0) 0 else price
+    }) / 100.0}
+    applyOffer(fruitList, Apple(), priceOff)
+
+
+  }
+
+}
+
+object Orange extends Offer {
+  override  def specialOffer(fruitList: List[Fruit]) : Double = {
+
+    val priceOff = (numberOfOranges:Int, price:Int) =>{((numberOfOranges / 3) * {
+      if (numberOfOranges == 0) 0 else price
+    }) / 100.0}
+
+    applyOffer(fruitList, Orange(), priceOff)
   }
 }
 
-object Orange extends Offer[Orange] {
-  override def applyOffer(fruitList: List[Fruit]): List[Orange] = {
-    val oranges = fruitList.flatMap {
-      case orange: Orange => Some(orange)
-      case _ => None
-    }
-    val numberOfOrangesAfterOffer = oranges.length - (oranges.length / 3)
-    oranges.slice(0, numberOfOrangesAfterOffer)
+
+sealed trait Offer {
+  def applyOffer(fruitList: List[Fruit], fruit: Fruit, calculatePriceOff: (Int, Int) => Double): Double = {
+    val specificFruitList = fruitList.filter(_.getClass == fruit.getClass)
+
+    calculatePriceOff(specificFruitList.length, specificFruitList.head.price)
   }
-}
+
+  def specialOffer(fruit: List[Fruit]) : Double
 
 
-sealed trait Offer[A] {
-  def applyOffer(fruitList: List[Fruit]): List[A]
 }

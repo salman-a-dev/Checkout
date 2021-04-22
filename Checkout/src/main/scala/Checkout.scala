@@ -1,16 +1,20 @@
 object Checkout extends App{
-  val specialOffers = List(Apple, Orange)
-  val listOfFruits = List("Apple", "Apple", "Orange", "Orange", "Orange", "Orange", "Orange", "Orange", "Orange")
 
+  val specialOffers = List(Apple, Orange)
+  val oneSpecialOffer = List(Apple)
+  //val listOfFruits = List("Apple", "Apple", "Orange", "Orange", "Orange", "Orange", "Orange", "Orange", "Orange")
+  val listOfFruits = List("Apple", "Apple", "Apple", "Apple", "Apple", "Apple", "Apple","Apple","Apple", "Orange", "Orange", "Orange")
   displayResult()
 
   def displayResult(): Unit = {
     processCheckout(listOfFruits).foreach(result => println(result))
 
     processCheckout(listOfFruits, specialOffers).foreach(result => println(result))
+
+    processCheckout(listOfFruits, oneSpecialOffer).foreach(result => println(result))
   }
 
-  def processCheckout(ls: List[String], specialOffers: List[Offer[_ >: Apple with Orange <: Fruit]] = List()): List[String] = {
+  def processCheckout(ls: List[String], specialOffers: List[Offer] = List()): List[String] = {
 
     val fruitContainer = FruitFactory.generateFruit(ls)
     val fruitListErrorContainer = if (fruitContainer.isEmpty) List(Left(EmptyFruitList)) else fruitContainer.filter(_.isLeft)
@@ -32,12 +36,11 @@ object Checkout extends App{
 
   }
 
-  private def calculatePrice(fruitContainer: List[Fruit], specialOffers: List[Offer[_ >: Apple with Orange <: Fruit]] = List()): Float = {
-    val updatedFruitListAfterOffer = if (specialOffers.nonEmpty)
-      specialOffers.distinct.flatMap(offer => offer.applyOffer(fruitContainer))
-    else fruitContainer
+  private def calculatePrice(fruitContainer: List[Fruit], specialOffers: List[Offer] = List()): Double = {
 
-    val totalPrice = updatedFruitListAfterOffer.foldLeft(0) {
+    val priceOff = getTotalPriceOff(fruitContainer, specialOffers)
+
+    val totalPrice = fruitContainer.foldLeft(0) {
       (total, next) => {
         next match {
           case Apple(price) => total + price
@@ -45,7 +48,18 @@ object Checkout extends App{
         }
       }
     }.toFloat / 100
-    totalPrice
+    totalPrice - priceOff
+
+  }
+
+  private def getTotalPriceOff(fruitContainer:List[Fruit], specialOffers: List[Offer] = List()): Double ={
+
+    if (specialOffers.nonEmpty)
+      specialOffers.distinct.map(offer => offer.specialOffer(fruitContainer)).foldLeft(0.0){
+        (total, next) =>
+          total + next
+      }
+    else 0
 
   }
 
